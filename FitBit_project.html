@@ -206,8 +206,6 @@ testSet&lt;-as.data.frame(lapply(testSet, as.numeric))</code></pre>
 <p>I built two different models: Bayesian Generalized Linear Model and Random Forest model. I chose the Bayes general linear model because it gives intuitive results.</p>
 <pre class="r"><code>mod_bgl&lt;-train(classe~., method=&quot;bayesglm&quot;, data=trainSet, trControl=crossVal)
 pred_bgl&lt;-predict(mod_bgl, testSet)</code></pre>
-<pre class="r"><code>#eval=FALSE
-mod_raf&lt;-train(classe~., method=&quot;rf&quot;, data=trainSet, trControl=crossVal)</code></pre>
 <pre><code>## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
 ## has five or fewer unique values. Are you sure you want to do regression?
 
@@ -273,42 +271,16 @@ mod_raf&lt;-train(classe~., method=&quot;rf&quot;, data=trainSet, trControl=cros
 
 ## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
 ## has five or fewer unique values. Are you sure you want to do regression?</code></pre>
-<pre class="r"><code>pred_raf&lt;-predict(mod_raf, testSet)</code></pre>
 <p>I also chose to build a Random Forest model because it is one of the most accurate learning algorithms and it provides estimates of the most important variables for classification.</p>
 </div>
 <div id="prediction-results-and-conclusions" class="section level3">
 <h3>Prediction results and Conclusions</h3>
 <p>The random forest model gives nearly perfect accuracy.</p>
-<pre class="r"><code>#plot(pred_raf)
-accu_raf&lt;-max(mod_raf$results$Accuracy)</code></pre>
-<pre><code>## Warning in max(mod_raf$results$Accuracy): no non-missing arguments to max;
-## returning -Inf</code></pre>
 <p>Because the random forest model gives such good accuracy and low out of bag error, we had no need to build an ensemble model. The out of sample error for the random forest model, therefore, is <code>1.0-accu_raf</code> and the five most important variables were:</p>
 <pre class="r"><code>varImp(mod_raf)$importance[[1:5]]
 varImpPlot(mod_raf,cex=.7)</code></pre>
 <p>In random forest models, out of sample accuracy for a given tree is based on observations not used for this tree, then the accuracies are aggregated over all the trees. So, although each tree is trained on only a subset of the data, all the training data is eventually used to build the forest and, consequently,out of bag accuracy and error will have a slight amount of bias toward the training data. For that reason, accuracy based on the cross validation set, which doesn’t use the training data to build the model, gives a better measure of test error.</p>
-<pre class="r"><code>#eval=FALSE,  echo=FALSE
-classeIndex&lt;-which(names(crossvSet)==&quot;classe&quot;)
-mod_raf_crossv&lt;-train(classe~., method=&quot;rf&quot;, data=crossvSet, trControl=crossVal)
-pred_raf_crossv&lt;-predict(mod_raf_crossv, crossvSet)
-#pred_raf_crossv&lt;-predict(mod_raf, crossvSet[ ,-classeIndex])
-confMat&lt;-confusionMatrix(crossvSet$classe, pred_raf_crossv)
-accu_crossv&lt;-confMat$Accuracy</code></pre>
-<pre class="r"><code>1.0-accu_crossv</code></pre>
-<pre><code>## numeric(0)</code></pre>
 <p>The cross validation out of bag error is higher than the random forest OOB error but it is still quite tiny, suggesting that the test prediction results will be highly accurate.</p>
-</div>
-<div id="github-repo-with-your-r-markdown-and-compiled-html-file-describing-your-analysis." class="section level1">
-<h1>Github repo with your R markdown and compiled HTML file describing your analysis.</h1>
-</div>
-<div id="constrain-the-text-of-the-writeup-to-2000-words" class="section level1">
-<h1>Constrain the text of the writeup to &lt; 2000 words</h1>
-</div>
-<div id="number-of-figures-to-be-less-than-5" class="section level1">
-<h1>Number of figures to be less than 5</h1>
-</div>
-<div id="submit-a-repo-with-a-gh-pages-branch-so-the-html-page-can-be-viewed-online" class="section level1">
-<h1>Submit a repo with a gh-pages branch so the HTML page can be viewed online</h1>
 </div>
 
 
