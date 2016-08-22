@@ -107,7 +107,7 @@ mod_bgl<-train(classe~., method="bayesglm", data=trainSet, trControl=crossVal)
 pred_bgl<-predict(mod_bgl, testSet)
 ```
 
-```{r }
+```{r cache=TRUE, echo=FALSE, results=FALSE}
 #eval=FALSE
 mod_raf<-train(classe~., method="rf", data=trainSet, trControl=crossVal)
 pred_raf<-predict(mod_raf, testSet)
@@ -119,35 +119,19 @@ I also chose to build a Random Forest model because it is one of the most accura
 
 The random forest model gives nearly perfect accuracy.  
 
-```{r}
+```{r echo=FALSE}
 #plot(pred_raf)
-accu_raf<-max(mod_raf$results$Accuracy)
+#accu_raf<-max(mod_raf$results$Accuracy)
+accu_raf<-mod_raf$Accuracy
 ```
 Because the random forest model gives such good accuracy and low out of bag error, we had no need to build an ensemble model. The out of sample error for the random forest model, therefore, is `1.0-accu_raf` and the five most important variables were:  
 
-```{r}
+```{r eval=FALSE}
 varImp(mod_raf)$importance[[1:5]]
 varImpPlot(mod_raf,cex=.7)
 ```
 
 In random forest models, out of sample accuracy for a given tree is based on observations not used for this tree, then the accuracies are aggregated over all the trees. So, although each tree is trained on only a subset of the data, all the training data is eventually used to build the forest and, consequently,out of bag accuracy and error will have a slight amount of bias toward the training data. For that reason, accuracy based on the cross validation set, which doesn't use the training data to build the model, gives a better measure of test error.   
 
-```{r }
-#eval=FALSE,  echo=FALSE
-classeIndex<-which(names(crossvSet)=="classe")
-mod_raf_crossv<-train(classe~., method="rf", data=crossvSet, trControl=crossVal)
-pred_raf_crossv<-predict(mod_raf_crossv, crossvSet)
-#pred_raf_crossv<-predict(mod_raf, crossvSet[ ,-classeIndex])
-confMat<-confusionMatrix(crossvSet$classe, pred_raf_crossv)
-accu_crossv<-confMat$Accuracy
-```
-```{r}
-1.0-accu_crossv
-```
 
 The cross validation out of bag error is higher than the random forest OOB error but it is still quite tiny, suggesting that the test prediction results will be highly accurate.  
-
-# Github repo with your R markdown and compiled HTML file describing your analysis. 
-# Constrain the text of the writeup to < 2000 words
-# Number of figures to be less than 5 
-# Submit a repo with a gh-pages branch so the HTML page can be viewed online
