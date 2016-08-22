@@ -1,0 +1,153 @@
+---
+title: "MachineLearning project"
+author: "cynco8d"
+date: "August 19, 2016"
+output: html_document
+---
+
+###Introduction
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. 
+
+One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. For the Weight Lifting Dataset, participants were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). In this project, I will use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants to predict the manner in which they did the exercise. We will predict the class of exercise for 20 different test cases.
+
+###Loading the training data and the test data
+
+```{r echo=FALSE}
+urlTrain<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+urlTest<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+fileTrain <- "pml-training.csv"
+fileTest <- "pml-testing.csv"
+
+if (file.exists(fileTrain)) {
+        trainSet <- read.csv(fileTrain, na.strings=c("NA","#DIV/0!",""))
+} else { 
+        download.file(urlTrain,fileTrain)
+        trainSet <- read.csv(fileTrain, na.strings=c("NA","#DIV/0!",""))
+        }  
+if (file.exists(fileTest)) {
+        testSet <- read.csv(fileTest, na.strings=c("NA","#DIV/0!",""))
+} else { 
+        download.file(urlTest,fileTest)
+        testSet <- read.csv(fileTest, na.strings=c("NA","#DIV/0!",""))
+} 
+```
+
+###Pre-processing the data
+
+The data is pre-processed by first removing columns with irrelevant info, NAs, near-zero variation and highly-correlated columns. Removing highly-correlated columns reduces overfitting.  
+
+```{r}
+library(caret)
+library(randomForest)
+set.seed(111)
+#keep a backup
+trainSet0<-trainSet
+#set aside a 40% cross-validation set
+inTrain<-createDataPartition(y=trainSet$classe, p=0.3)[[1]] #row numbers
+trainSet<-trainSet[inTrain, ]
+inTrain<-createDataPartition(y=trainSet$classe, p=0.6)[[1]] #row numbers
+trainSet<-trainSet[inTrain, ]
+crossvSet<-trainSet[-inTrain, ]
+trainSet00<-trainSet
+
+#irrelevant columns such as names, etc
+names(trainSet)[1:9]
+irrCols<-seq(1,7)
+trainSet<-trainSet[ ,-irrCols]
+
+# drop columns with more than 1,000 NAs
+#colLength<-dim(trainSet)[[1]]
+naCols <- (colSums(is.na(trainSet)) > 1000) #TRUE/FALSE
+naIndex<-which(naCols==TRUE)
+if (length(naIndex) > 0) {
+  trainSet <- trainSet[ ,-naIndex] 
+}
+#trainSet000<-trainSet
+
+#near-zero variability
+nzvCols<-nearZeroVar(trainSet) #check with which(nzvCols)
+if (length(nzvCols) > 0) {
+  trainSet <- trainSet[ ,-nzvCols] 
+}
+#correlation matrix
+trainSet<-as.data.frame(lapply(trainSet, as.numeric)) #cor requires num
+classeIndex<-which(names(trainSet)=="classe")
+corMat<-cor(trainSet[, -classeIndex], use="pairwise.complete.obs")
+diag(corMat)<-0
+highCorCols<-findCorrelation(corMat,cutoff=0.7)
+if (length(highCorCols) > 0) {
+  trainSet <- trainSet[ ,-highCorCols] 
+}
+
+#Apply preprocessing to cross validation set
+colKept<-names(trainSet)
+crossvSet<-subset(crossvSet, select=colKept)
+
+#Apply preprocessing to testSet
+classeIndex<-which(names(trainSet)=="classe")
+colKept<-colKept[-classeIndex]
+testSet<- subset(testSet, select=colKept)
+testSet<-as.data.frame(lapply(testSet, as.numeric))
+```
+
+I have reserved 40% of the training set for cross-validation and I will do 5-fold cross validation using trainControl.  
+
+```{r}
+crossVal <- trainControl(method = "cv", number = 7, 
+            verboseIter=FALSE, preProcOptions="pca",allowParallel=TRUE)
+```
+
+###Building a model for qualitative activity recognition of weight lifting exercise
+
+I built two different models: Bayesian Generalized Linear Model and Random Forest model. I chose the Bayes general linear model because it gives intuitive results.  
+
+```{r eval=FALSE }
+mod_bgl<-train(classe~., method="bayesglm", data=trainSet, trControl=crossVal)
+pred_bgl<-predict(mod_bgl, testSet)
+```
+
+```{r }
+#eval=FALSE
+mod_raf<-train(classe~., method="rf", data=trainSet, trControl=crossVal)
+pred_raf<-predict(mod_raf, testSet)
+```
+
+I also chose to build a Random Forest model because it is one of the most accurate learning algorithms and it provides estimates of the most important variables for classification.   
+
+###Prediction results and Conclusions
+
+The random forest model gives nearly perfect accuracy.  
+
+```{r}
+#plot(pred_raf)
+accu_raf<-max(mod_raf$results$Accuracy)
+```
+Because the random forest model gives such good accuracy and low out of bag error, we had no need to build an ensemble model. The out of sample error for the random forest model, therefore, is `1.0-accu_raf` and the five most important variables were:  
+
+```{r}
+varImp(mod_raf)$importance[[1:5]]
+varImpPlot(mod_raf,cex=.7)
+```
+
+In random forest models, out of sample accuracy for a given tree is based on observations not used for this tree, then the accuracies are aggregated over all the trees. So, although each tree is trained on only a subset of the data, all the training data is eventually used to build the forest and, consequently,out of bag accuracy and error will have a slight amount of bias toward the training data. For that reason, accuracy based on the cross validation set, which doesn't use the training data to build the model, gives a better measure of test error.   
+
+```{r }
+#eval=FALSE,  echo=FALSE
+classeIndex<-which(names(crossvSet)=="classe")
+mod_raf_crossv<-train(classe~., method="rf", data=crossvSet, trControl=crossVal)
+pred_raf_crossv<-predict(mod_raf_crossv, crossvSet)
+#pred_raf_crossv<-predict(mod_raf, crossvSet[ ,-classeIndex])
+confMat<-confusionMatrix(crossvSet$classe, pred_raf_crossv)
+accu_crossv<-confMat$Accuracy
+```
+```{r}
+1.0-accu_crossv
+```
+
+The cross validation out of bag error is higher than the random forest OOB error but it is still quite tiny, suggesting that the test prediction results will be highly accurate.  
+
+# Github repo with your R markdown and compiled HTML file describing your analysis. 
+# Constrain the text of the writeup to < 2000 words
+# Number of figures to be less than 5 
+# Submit a repo with a gh-pages branch so the HTML page can be viewed online
