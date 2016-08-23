@@ -102,15 +102,17 @@ crossVal <- trainControl(method = "cv", number = 7,
 
 I built two different models: Bayesian Generalized Linear Model and Random Forest model. I chose the Bayes general linear model because it gives intuitive results.  
 
-```{r eval=FALSE }
+```{r eval=FALSE, results=FALSE}
 mod_bgl<-train(classe~., method="bayesglm", data=trainSet, trControl=crossVal)
 pred_bgl<-predict(mod_bgl, testSet)
 ```
 
 ```{r cache=TRUE, echo=FALSE, results=FALSE}
 #eval=FALSE
+options(warn=-1)
 mod_raf<-train(classe~., method="rf", data=trainSet, trControl=crossVal)
 pred_raf<-predict(mod_raf, testSet)
+options(warn=0)
 ```
 
 I also chose to build a Random Forest model because it is one of the most accurate learning algorithms and it provides estimates of the most important variables for classification.   
@@ -122,7 +124,7 @@ The random forest model gives nearly perfect accuracy.
 ```{r echo=FALSE}
 #plot(pred_raf)
 #accu_raf<-max(mod_raf$results$Accuracy)
-accu_raf<-mod_raf$Accuracy
+(accu_raf<-mod_raf$Accuracy)
 ```
 Because the random forest model gives such good accuracy and low out of bag error, we had no need to build an ensemble model. The out of sample error for the random forest model, therefore, is `1.0-accu_raf` and the five most important variables were:  
 

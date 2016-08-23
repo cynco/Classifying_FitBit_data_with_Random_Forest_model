@@ -206,76 +206,12 @@ testSet&lt;-as.data.frame(lapply(testSet, as.numeric))</code></pre>
 <p>I built two different models: Bayesian Generalized Linear Model and Random Forest model. I chose the Bayes general linear model because it gives intuitive results.</p>
 <pre class="r"><code>mod_bgl&lt;-train(classe~., method=&quot;bayesglm&quot;, data=trainSet, trControl=crossVal)
 pred_bgl&lt;-predict(mod_bgl, testSet)</code></pre>
-<pre><code>## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?
-
-## Warning in randomForest.default(x, y, mtry = param$mtry, ...): The response
-## has five or fewer unique values. Are you sure you want to do regression?</code></pre>
 <p>I also chose to build a Random Forest model because it is one of the most accurate learning algorithms and it provides estimates of the most important variables for classification.</p>
 </div>
 <div id="prediction-results-and-conclusions" class="section level3">
 <h3>Prediction results and Conclusions</h3>
 <p>The random forest model gives nearly perfect accuracy.</p>
+<pre><code>## NULL</code></pre>
 <p>Because the random forest model gives such good accuracy and low out of bag error, we had no need to build an ensemble model. The out of sample error for the random forest model, therefore, is <code>1.0-accu_raf</code> and the five most important variables were:</p>
 <pre class="r"><code>varImp(mod_raf)$importance[[1:5]]
 varImpPlot(mod_raf,cex=.7)</code></pre>
