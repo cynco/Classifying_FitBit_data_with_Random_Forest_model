@@ -1,17 +1,17 @@
 ---
-title: "MachineLearning project"
+title: "Using machine learning to classify FitBit data"
 author: "cynco8d"
 date: "August 19, 2016"
 output: html_document
 ---
 
-###Introduction
+### Introduction
 
 Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. 
 
 One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. For the Weight Lifting Dataset, participants were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). In this project, I will use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants to predict the manner in which they did the exercise. We will predict the class of exercise for 20 different test cases.
 
-###Loading the training data and the test data
+### Loading the training data and the test data
 
 ```{r echo=FALSE}
 urlTrain<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
@@ -33,7 +33,7 @@ if (file.exists(fileTest)) {
 } 
 ```
 
-###Pre-processing the data
+### Pre-processing the data
 
 The data is pre-processed by first removing columns with irrelevant info, NAs, near-zero variation and highly-correlated columns. Removing highly-correlated columns reduces overfitting.  
 
@@ -98,7 +98,7 @@ crossVal <- trainControl(method = "cv", number = 7,
             verboseIter=FALSE, preProcOptions="pca",allowParallel=TRUE)
 ```
 
-###Building a model for qualitative activity recognition of weight lifting exercise
+### Building a model for qualitative activity recognition of weight lifting exercise
 
 I built two different models: Bayesian Generalized Linear Model and Random Forest model. I chose the Bayes general linear model because it gives intuitive results.  
 
@@ -117,7 +117,7 @@ options(warn=0)
 
 I also chose to build a Random Forest model because it is one of the most accurate learning algorithms and it provides estimates of the most important variables for classification.   
 
-###Prediction results and Conclusions
+### Prediction results and Conclusions
 
 The random forest model gives nearly perfect accuracy.  
 
